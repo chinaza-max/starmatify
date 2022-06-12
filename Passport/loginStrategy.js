@@ -6,13 +6,15 @@ const LocalStrategy=require('passport-local').Strategy
 const Redis = require('ioredis');
 const { connect } = require('../DB/mySql');
 
-
+/*
 const redis = new Redis({
     port: 10699, // Redis port
     host: "redis-10699.c12.us-east-1-4.ec2.cloud.redislabs.com", // Redis host
     username: "default", // needs Redis >= 6
     password: "vr1ksiXL79YnSxirC7ROVPfNVrsSQOHo",
   });
+
+  */
 const maxNumberOfFailedLogins = 3;
 const timeWindowForFailedLogins = 60 * 60 * 1
 

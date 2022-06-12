@@ -2,7 +2,7 @@
 
 1.   --------sign up route---------
 2.   ---------login route----------
-
+3.   ---------verifyUserEmail------
 */
 
 
@@ -50,11 +50,12 @@ function test(req,res){
 
 //loginSignUpRateLimiter
 router.post('/userSignUp',(req, res, next)=>{
-    passport.authenticate("local-userSignUp",(err, user, info) =>{
+    passport.authenticate("local-userSignUp",(err, message, info) =>{
         if (err) {
             console.log("chinaza")
             return res.status(400).json({express:{"payLoad":err,"status":false}})
         }
+/*
         res.setHeader('Set-Cookie', Cookie.serialize('accessToken',JSON.stringify({"Token":user.accessToken}),{
             httpOnly: true,
         }));
@@ -63,10 +64,14 @@ router.post('/userSignUp',(req, res, next)=>{
         res.setHeader('Set-Cookie', Cookie.serialize('refreshToken',JSON.stringify({"Token":user.refreshToken}), {
             httpOnly: true,
         }));
-    
-        //user id(from mongoDB) is sent back;
-        return res.status(200).json({express:{"payLoad":user.payload2,"status":true}})
+    */
+       // console.log("-----"+user)
+        return res.status(200).json({express:{"payLoad":message,"status":true}})
     })(req, res, next)
+})
+
+router.post('/verifyUserEmail',async (req, res)=>{
+  console.log(req.body.id)
 })
 
 //loginSignUpRateLimiter

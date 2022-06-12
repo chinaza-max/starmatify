@@ -1,4 +1,6 @@
-let con = require('../mySql');
+let getConnection = require('../mySql');
+
+
 
 
 con.query(`USE mydb4`);
