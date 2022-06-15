@@ -1,7 +1,7 @@
 const passport=require('passport')
 //const User=require("../MongoDB/Models/users")
 const userSignUpStrategy=require("./userSignUpStrategy")
-const loginStrategy=require("./loginStrategy")
+const userLoginStrategy=require("./userLoginStrategy")
 
 
 
@@ -16,6 +16,6 @@ passport.deserializeUser((id,done)=>{
 */
 
 passport.use("local-userSignUp",userSignUpStrategy)
-passport.use("local-login",loginStrategy)
+passport.use("local-userLogin",userLoginStrategy)
 
-module.exports=passport
+module.exports=passport;

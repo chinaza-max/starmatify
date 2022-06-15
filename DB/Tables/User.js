@@ -12,13 +12,14 @@ getConnection((err,con)=>{
       id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
       firstName VARCHAR(30) NOT NULL,
       lastName VARCHAR(30) NOT NULL,
-      password VARCHAR(30) NOT NULL,
+      password VARCHAR(100) NOT NULL,
       email VARCHAR(50),
       address VARCHAR(30) NOT NULL,
       tel bigint(12) NOT NULL,
       gender VARCHAR(30) NOT NULL,
       active VARCHAR(30) NOT NULL,
       userId VARCHAR(30) NOT NULL,
+      avatar VARCHAR(30) NOT NULL,
       reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )`
     
@@ -29,4 +30,3 @@ getConnection((err,con)=>{
     });
   }
 })
-

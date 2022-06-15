@@ -1,12 +1,10 @@
 /*
 
-1.   --------sign up route---------
-2.   ---------login route----------
+1.   --------Usersign up route---------
+2.   ---------Userlogin route----------
 3.   ---------verifyUserEmail------
+
 */
-
-
-
 
 const express=require("express")
 const passport=require('passport')
@@ -14,6 +12,7 @@ const rateLimit = require('express-rate-limit')
 const Cookie = require('cookie')
 const router=express.Router();
 const axios = require('axios');
+const getConnection = require("../DB/mySql");
 const CancelToken = axios.CancelToken;
 const source = CancelToken.source();
 
@@ -48,35 +47,72 @@ function test(req,res){
        // console.log(req.body)
 }
 
+
+router.get('/verifyUserEmail/:id',async (req, res)=>{
+  
+  let hash=req.params.id
+  getConnection((err,con)=>{
+    if(err){
+      return res.status(500).send("error with dataBase1 ",null);
+    }
+    else{
+      con.query("SELECT userId FROM activateAccount WHERE hash = ?", [hash] , function (error, results, fields) {
+        if(error){
+          con.release();
+          return res.status(500).send("error with dataBase ");
+        }
+        else{
+          if(!results.length){
+            res.status(200).send("account has been activated already");
+          }
+          else{
+            let userId=results[0].userId
+            con.query("UPDATE userTable2 SET active = true WHERE userId = ?", [userId] , function (error, results, fields) {
+              if(error){
+                con.release();
+                return res.status(500).send("error with dataBase");
+              }
+              else{
+                console.log("kkkkoo")
+                con.query("DELETE FROM activateAccount WHERE hash = ?", [hash] , function (error, results, fields) {
+                  if(error){
+                    con.release();
+                    return res.status(500).send("error with dataBase");
+                  }
+                  else{
+                    console.log("==========hash=================")
+                    removeDuplicateAcc()
+                    con.release();
+                    return res.status(200).send("<h2 style='text-align:center'>your account have been succesfully activate goback to site and login</h2>");
+                  }        
+                })   
+              }        
+            })
+          }
+        }        
+     })
+    }
+  })
+
+})
+
+
 //loginSignUpRateLimiter
 router.post('/userSignUp',(req, res, next)=>{
     passport.authenticate("local-userSignUp",(err, message, info) =>{
         if (err) {
-            console.log("chinaza")
             return res.status(400).json({express:{"payLoad":err,"status":false}})
         }
-/*
-        res.setHeader('Set-Cookie', Cookie.serialize('accessToken',JSON.stringify({"Token":user.accessToken}),{
-            httpOnly: true,
-        }));
 
-        
-        res.setHeader('Set-Cookie', Cookie.serialize('refreshToken',JSON.stringify({"Token":user.refreshToken}), {
-            httpOnly: true,
-        }));
-    */
-       // console.log("-----"+user)
         return res.status(200).json({express:{"payLoad":message,"status":true}})
     })(req, res, next)
 })
 
-router.post('/verifyUserEmail',async (req, res)=>{
-  console.log(req.body.id)
-})
+
 
 //loginSignUpRateLimiter
-router.post('/login',(req, res, next)=>{
-    passport.authenticate("local-login",(err, user, info) =>{
+router.post('/userLogin',(req, res, next)=>{
+    passport.authenticate("local-userLogin",(err, user, info) =>{
         if (err) {
             //return res.status(400).json({express:err})
             return res.status(400).json({express:{"payLoad":err,"status":false}})
@@ -84,13 +120,14 @@ router.post('/login',(req, res, next)=>{
 
         res.setHeader('Set-Cookie', Cookie.serialize('accessToken',JSON.stringify({"Token":user.accessToken}), {
             httpOnly: true,
+            maxAge: 60 * 60 * 24 * 7 
         }));
-
+/*
         res.setHeader('Set-Cookie', Cookie.serialize('refreshToken',JSON.stringify({"Token":user.refreshToken}), {
             httpOnly: true,
+            maxAge: 60 * 60 * 24 * 7 
         }));
-
-        //user id(from mongoDB) is sent back;
+*/
         return res.status(200).json({express:{"payLoad":user.payload2,"status":true}})
     })(req, res, next)
 })
@@ -224,5 +261,57 @@ router.get("/response", async (req, res) => {
     }
   };
 
+
+
+
+
+//this function remove duplicate account from db
+function removeDuplicateAcc(){
+  getConnection((err,con)=>{
+    if(err){
+      console.log("error with dataBase when clearing duplicates ");
+    }
+    else{
+      con.query("SELECT * FROM activateAccount", function (err, result, fields) {
+        if (err) throw err;
+        console.log(result);
+        if(!result.length){
+
+        }
+        else{
+          for(let i=0;i<result.length;i++){
+          
+            let date = new Date();
+            let timeLimit = new Date(date.getTime() + (7 * 24 * 60 * 60 * 1000)).getTime();
+            let time = new Date(result[i].reg_date).getTime();
+            console.log(timeLimit>time)
+            if(timeLimit>time){
+              con.query("DELETE FROM activateAccount WHERE userId = ?", [result[i].userId] , function (error, results, fields) {
+                if(error){                                                                                                                                                                     
+                  con.release();
+                  console.log(error);
+                }
+                else{
+                  con.query("DELETE FROM userTable2 WHERE userId = ?", [result[i].userId] , function (error, results, fields) {
+                    if(error){                                                                                                                                                                     
+                      con.release();
+                      console.log(error);
+                    }
+                    else{
+                      console.log("duplicate removed")
+                    }        
+                  })
+                }        
+              }) 
+            }
+            if(i==result.length-1){
+              con.release()
+            }
+          }
+        }
+      });
+    }
+  })
+}
 module.exports=router;
 

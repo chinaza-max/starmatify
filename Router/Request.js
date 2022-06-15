@@ -1,5 +1,5 @@
 /*
-1. ------------get account balance--------------
+1. ------------form--------------
 */
 
 
@@ -41,10 +41,10 @@ router.get("/wallet/:userId/balance",verifyJWT,async (req, res) => {
 });
 
 //this route protect all form submission 
-router.get('/form',csrfProtection,verifyJWT,function (req, res) {
+router.get('/form',verifyJWT,csrfProtection, function (req, res) {
    // pass the csrfToken to the view
+   console.log(req.csrfToken())
   return  res.status(200).json({express:{"payLoad":req.csrfToken() ,"status":true}})
 })
 
-
-  module.exports = router ;
+module.exports = router;

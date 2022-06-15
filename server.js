@@ -40,8 +40,13 @@ const router1=require('./Router/Account')
 const router2=require('./Router/Post')
 const router3=require('./Router/Request')
 
+//Admin routes
+const router4=require('./Router/Admin/Post')
+
 app.use("/",router1);
 app.use("/",router2);
 app.use("/",router3);
+app.use("/",router4);
+
 
 server.listen(port ,()=>console.log(`server started.... ${port}`))

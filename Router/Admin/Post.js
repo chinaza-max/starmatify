@@ -6,54 +6,42 @@
 
 */
 
-
 const express=require("express");
 const bcrypt=require('bcrypt');
 const router=express.Router();
-const verifyJWT=require("../middleware/deserializeJWT");
-const getConnection = require("../DB/mySql");
+const verifyJWT=require("../../middleware/deserializeJWT");
+const getConnection = require("../../DB/mySql");
 const csrf = require('csurf');
 const csrfProtection = csrf({ cookie: true,httpOnly :true})
 
-router.post('/user/:userId/update',verifyJWT,csrfProtection,async(req, res)=>{
-    const { userId} = req.params;
-    console.log(userId)
-
-    if(req.userId==userId){
+router.post('/testAdmin',async(req, res)=>{
     
-        const hashedPassword=await bcrypt.hash( req.body.password,10)
-        let update = [
-            req.body.firstName,
-            req.body.lastName,
-            hashedPassword,
-            req.body.address,
-            req.body.tel,
-            req.body.gender,
-            userId
-        ]
-        getConnection((err,con)=>{
-            if(err){
-              return res.status(500).send("error with dataBase1 ",null);
-            }
-            else{
-                con.query("UPDATE userTable2 SET firstName=?, lastName=?, password=?, address=?, tel=?, gender=? WHERE userId = ?",update, function (error, results, fields) {
-                    if(error){
-                        console.log(error)
-                      con.release();
-                     
-                      return res.status(500).json({express:{"payLoad":"error with dataBase",status:false}});
-                    }
-                    else{
-                        return  res.json({express:{"payLoad":'successfully updated',status:true}})
-                    }        
-                })
-            }
-        })
-      
-    }
-    else{
-        return  res.json({express:{"payLoad":'user needs to login',status:false}})
-    }
+    console.log("chinazs")
+    let reg = {
+        name: req.body.firstName,
+        email: req.body.email,
+        password: req.body.password,
+        AdminType:req.body.AdminType
+    };
+
+    getConnection((err,con)=>{
+        if(err){
+            return  res.status(500).json({express:{payLoad:"error from server ",status:false}})
+        }
+        else{
+            con.query("INSERT INTO Admin SET ?",reg,function (err, results) {
+                if (err) {
+                  con.release();
+                  return  res.status(500).json({express:{payLoad:"error from db",status:false}})
+                } 
+                else {
+                  con.release();
+                  return  res.status(200).json({express:{payLoad:"registration successfull",status:true}})
+                }
+              }
+            );
+        }
+    })
 })
 
 //receive quote when user has signed up

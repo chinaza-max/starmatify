@@ -14,19 +14,22 @@ const jwt = require('jsonwebtoken');
         return  res.status(403).json({express:{"payLoad":'user needs to login',"status":false}})
     }
     else{
+       
         if(cookies.accessToken){
             let userObj = JSON.parse(cookies.accessToken)
             let accessToken = userObj.Token
     
             jwt.verify(accessToken,process.env.APP_PUBLIC_KEY_JWT,{ algorithms: ['RS256'] },function(err, decoded) {
                 if(err){
-                
+                 
                     if(err.name == "TokenExpiredError"){
+                      
                         let userObj = JSON.parse(cookies.refreshToken)
                         let refreshToken = userObj.Token
                         jwt.verify(refreshToken,process.env.APP_PUBLIC_KEY_JWT,{ algorithms: ['RS256'] },function(err, decoded) {
                             if(err){
                                 if(err.name=="TokenExpiredError"){
+                                
                                     return  res.json({express:{"payLoad":'user needs to login',"status":false}})
                                 }
                                 else{
@@ -34,6 +37,7 @@ const jwt = require('jsonwebtoken');
                                 }
                             }
                             else{
+                                
                                 let payload1={"id":decoded.id}
                                 jwt.sign(payload1,process.env.APP_PRIVATE_KEY_JWT, { algorithm: 'RS256',expiresIn: '1y'}, function(err,accessToken) {
                                     if(err)throw err;
@@ -60,6 +64,7 @@ const jwt = require('jsonwebtoken');
             });
         }
         else{
+            
             return  res.status(403).json({express:{"payLoad":'user needs to login',"status":false}})
         }
     }

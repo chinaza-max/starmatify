@@ -25,21 +25,24 @@ const timeWindowForFailedLogins = 60 * 60 * 1;
 const userSignUpLocalStrategy = new LocalStrategy(
   { usernameField: "tel", passwordField: "password", passReqToCallback: true },
   async (req, tel, password, done) => {
-    //console.log(req.body);
+  
     const subject="ACTIVATE STARMATEFY ACCOUNT";
     const text="click to activate"
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const id=uuid()
-    const hash=entropy.sessionID()
-    const email = req.body.email;
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const id=uuid();
+    const hash=entropy.sessionID();
+    const email = req.body.email||'';
+
+
     let reg = {
       firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      password: hashedPassword,
-      address:req.body.lastName,
+      lastName: req.body.lastName||"",
+      password: hashedPassword||email,
+      address:req.body.lastName||"",
       email: email,
       tel: tel,
-      gender: req.body.gender,
+      gender: req.body.gender||"",
       active:false,
       userId:id
     };
