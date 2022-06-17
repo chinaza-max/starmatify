@@ -33,7 +33,7 @@ const userSignUpLocalStrategy = new LocalStrategy(
     const id=uuid();
     const hash=entropy.sessionID();
     const email = req.body.email||'';
-
+    
 
     let reg = {
       firstName: req.body.firstName,

@@ -1,27 +1,32 @@
 const getConnection = require('../mySql');
 const { v4: uuid } = require('uuid')
+const bcrypt = require("bcrypt");
 const id=uuid();
 
 
 
-let reg = {
-  userName:process.env.APP_ADMIN_USERNAME,
-  password:process.env.APP_ADMIN_PASSWORD,
-  AdminType:true,
-  adminID:id
-};
 
-getConnection((err,con)=>{
+getConnection(async(err,con)=>{
   if(err){
     console.log(err)
   }
   else{
+    const hashedPassword =await bcrypt.hash(process.env.APP_ADMIN_PASSWORD, 10);
+   // console.log(hashedPassword)
+    let reg = {
+      userName:process.env.APP_ADMIN_USERNAME,
+      password:hashedPassword,
+      AdminType:true,
+      adminID:id
+    };
+
+
     let sql=`CREATE TABLE IF NOT EXISTS Admin2(
       id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
       userName VARCHAR(30) NOT NULL,
-      password VARCHAR(50),
+      password VARCHAR(100),
       adminType VARCHAR(30) NOT NULL,
-      adminID  VARCHAR(30) NOT NULL,
+      adminId  VARCHAR(30) NOT NULL,
       reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )`;
     

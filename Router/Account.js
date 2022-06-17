@@ -2,7 +2,9 @@
 
 1.   --------Usersign up route---------
 2.   ---------Userlogin route----------
-3.   ---------verifyUserEmail------
+3.   ---------adminLogin------
+4.   ---------verifyUserEmail------
+
 
 */
 
@@ -101,10 +103,10 @@ router.get('/verifyUserEmail/:id',async (req, res)=>{
 router.post('/userSignUp',(req, res, next)=>{
     passport.authenticate("local-userSignUp",(err, message, info) =>{
         if (err) {
-            return res.status(400).json({express:{"payLoad":err,"status":false}})
+            return res.status(400).json({express:{payLoad:err,status:false}})
         }
 
-        return res.status(200).json({express:{"payLoad":message,"status":true}})
+        return res.status(200).json({express:{payLoad:message,status:true}})
     })(req, res, next)
 })
 
@@ -127,10 +129,125 @@ router.post('/userLogin',(req, res, next)=>{
             httpOnly: true,
             maxAge: 60 * 60 * 24 * 7 
         }));
-*/
+        */
         return res.status(200).json({express:{"payLoad":user.payload2,"status":true}})
     })(req, res, next)
 })
+
+
+
+router.post('/adminLogin',(req, res, next)=>{
+  passport.authenticate("local-adminLogin",(err, user, info) =>{
+      if (err) {
+          //return res.status(400).json({express:err})
+          return res.status(400).json({express:{payLoad:err,status:false}})
+      }
+
+      res.setHeader('Set-Cookie', Cookie.serialize('accessToken',JSON.stringify({"Token":user.accessToken}), {
+          httpOnly: true,
+          maxAge: 60 * 60 * 24 * 7 
+      }));
+
+      res.setHeader('Set-Cookie', Cookie.serialize('refreshToken',JSON.stringify({"Token":user.refreshToken}), {
+          httpOnly: true,
+          maxAge: 60 * 60 * 24 * 7 
+      }));
+      
+
+      /*
+        REASON 
+        when client hit this route without password and user name 
+        the user is threated like an authenticated user 
+        and get the res 200 but no payload(payload will be empty because it an 
+          invalid user)
+
+      */
+      if(user.AdminDetails){
+        return res.status(200).json({express:{payLoad:user.AdminDetails,status:true}})
+        
+      }else{
+        return res.status(200).json({express:{payLoad:"no user found",status:false}})
+      }
+  
+     
+  })(req, res, next)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 router.get("/response", async (req, res) => {

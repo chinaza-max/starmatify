@@ -5,6 +5,7 @@ require("dotenv").config();
 const http = require('http');
 const express = require('express');
 const cors = require("cors");
+const fileUpload = require('express-fileupload');
 //const mongoSanitize = require('express-mongo-sanitize');
 let cookieParser = require('cookie-parser');
 
@@ -20,6 +21,7 @@ app.use(cors())
 app.use(cookieParser())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
+app.use(fileUpload());
 /*
 app.use(
   mongoSanitize({

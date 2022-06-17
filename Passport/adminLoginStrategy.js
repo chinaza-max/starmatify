@@ -19,8 +19,11 @@ const maxNumberOfFailedLogins = 3;
 const timeWindowForFailedLogins = 60 * 60 * 1
 
 
-const userLoginLocalStrategy=new LocalStrategy({usernameField: 'email',
-passwordField: 'password',passReqToCallback: true},(req,email,password,done)=>{
+const adminLoginStrategy=new LocalStrategy({usernameField: 'userName',
+passwordField: 'password',passReqToCallback: true},(req,userName,password,done)=>{
+   
+
+
    
     getConnection((err,con)=>{
         if(err){
@@ -28,8 +31,8 @@ passwordField: 'password',passReqToCallback: true},(req,email,password,done)=>{
           return done("error with db ",null);
         }
         else{
-          con.query("SELECT * FROM userTable2  WHERE email = ?",
-          [email],
+          con.query("SELECT * FROM Admin2  WHERE userName = ?",
+          [userName],
          async function (err, result, fields) {
             if(err){
                 console.log(err);
@@ -44,8 +47,9 @@ passwordField: 'password',passReqToCallback: true},(req,email,password,done)=>{
                 return done({"payLoad":"Too many request, please try again after an hour","status":false},null)
             }
           */
-           
-            if(!result.length||result[0].active==0){
+            
+            if(!result.length){
+                
                   //open later
                // await redis.set(tel, ++userAttempts, 'ex', timeWindowForFailedLogins)
                return done('user not found',null)
@@ -53,15 +57,15 @@ passwordField: 'password',passReqToCallback: true},(req,email,password,done)=>{
             else{
                 con.release();
                 try{
-                    console.log(result[0].password)
+                    console.log(result[0])
                     console.log(await bcrypt.compare(password,result[0].password))
                     if(await bcrypt.compare(password,result[0].password)){
         
                         //open later
                       //  await redis.del(user.tel)
-        
-                        let payload1={"id":result[0].userId,"tel":result[0].tel}
-                        let payload2={"id":result[0].userId}
+                   
+                        let payload1={"id":result[0].adminId,"tel":result[0].userName}
+                        let payload2={"id":result[0].adminId}
                         try{
                             jwt.sign(payload1,process.env.APP_PRIVATE_KEY_JWT, { algorithm: 'RS256',expiresIn: '5s'}, function(err,accessToken) {
                                 if(err){
@@ -75,13 +79,15 @@ passwordField: 'password',passReqToCallback: true},(req,email,password,done)=>{
                                             return done('error from server refreshToken key',null)
                                         }
                                         else{
-                                            return done(null,{accessToken,refreshToken,payload2})
+                                           
+                                            const AdminDetails={id:result[0].adminId,adminType:result[0].adminType}
+                                            return done(null,{accessToken,refreshToken,AdminDetails})
                                         }
                                     });
                                 }
                             });
                         }catch(e){
-                            console.log("check loginLocalStrategy file where the jwt is been signed")
+                            console.log("check adminloginLocalStrategy file where the jwt is been signed")
                             console.log(e)
                             return done('error from server jwt',null)
                         }
@@ -99,4 +105,4 @@ passwordField: 'password',passReqToCallback: true},(req,email,password,done)=>{
     })
 })
 
-module.exports=userLoginLocalStrategy;
+module.exports=adminLoginStrategy;
