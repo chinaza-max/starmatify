@@ -6,11 +6,11 @@ getConnection((err,con)=>{
   }
   else{
 
-    let sql=`CREATE TABLE IF NOT EXISTS Job1(
-        jobId VARCHAR(30) NOT NULL,
-        projectId VARCHAR(30) NOT NULL,
-        projectName VARCHAR(15) NOT NULL,
-        duration VARCHAR(10) DEFAULT NULL,
+    let sql=`CREATE TABLE IF NOT EXISTS projectLog(
+        projectLogId VARCHAR(50) NOT NULL,
+        projectId VARCHAR(50) NOT NULL,
+        clockIn VARCHAR(5) NOT NULL,
+        clockOut VARCHAR(5) DEFAULT NULL,
         reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         PRIMARY KEY (projectReportId),
         FOREIGN KEY (projectId) REFERENCES Employee (projectId) ON DELETE CASCADE  
@@ -19,7 +19,7 @@ getConnection((err,con)=>{
     con.query(sql, function (err, result) {
       if (err) throw err;
       con.release();
-      console.log("=======Job1 table availeble========");
+      console.log("=======projectLog table availeble========");
     });
   }
 })

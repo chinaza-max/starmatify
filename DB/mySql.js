@@ -53,7 +53,8 @@ const getConnection=function(callBack){
 module.exports=getConnection;
 require("./Tables/User")
 require("./Tables/ActiveAccount")
-require("./Tables/Quote")
+require("./Tables/Request")
 require("./Tables/Admin")
+require("./Tables/Quote")
 
 //https://riptutorial.com/node-js/example/29792/export-connection-pool

@@ -9,17 +9,17 @@ getConnection((err,con)=>{
   else{
       //con.query(`USE starmate2`);
     let sql=`CREATE TABLE IF NOT EXISTS userTable2(
-      id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-      firstName VARCHAR(30) NOT NULL,
-      lastName VARCHAR(30) NOT NULL,
+      userId VARCHAR(30) NOT NULL,
+      firstName VARCHAR(15) NOT NULL,
+      lastName VARCHAR(15) NOT NULL,
       password VARCHAR(100) NOT NULL,
       email VARCHAR(50),
       address VARCHAR(30) NOT NULL,
       tel bigint(12) NOT NULL,
-      gender VARCHAR(30) NOT NULL,
-      active VARCHAR(30) NOT NULL,
-      userId VARCHAR(30) NOT NULL,
+      gender VARCHAR(8) NOT NULL,
+      active VARCHAR(6) NOT NULL,
       avatar VARCHAR(30) NOT NULL,
+      PRIMARY KEY (userId),
       reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )`
     

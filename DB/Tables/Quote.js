@@ -6,17 +6,17 @@ getConnection((err,con)=>{
     console.log(err)
   }
   else{
-      
-      let sql=`CREATE TABLE IF NOT EXISTS Quote1(
-        id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        firstName VARCHAR(30) NOT NULL,
-        email VARCHAR(50),
-        tel VARCHAR(30) NOT NULL,
-        details JSON DEFAULT NULL,
-        status VARCHAR(30) NOT NULL,
-        accountStatus VARCHAR(30) NOT NULL,
-        reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )`;
+      //Status if qoue
+    let sql=`CREATE TABLE IF NOT EXISTS Quote1(
+      qouteId VARCHAR(30) NOT NULL,
+      firstName VARCHAR(30) NOT NULL,
+      email VARCHAR(30),
+      detail JSON DEFAULT NULL,
+      pdfName VARCHAR(30) NOT NULL,
+      acceptStatus VARCHAR(7) NOT NULL,
+      PRIMARY KEY (qouteId),
+      reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )`;
     
     con.query(sql, function (err, result) {
       if (err) throw err;

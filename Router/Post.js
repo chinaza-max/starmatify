@@ -1,8 +1,9 @@
 /*
 
 1. ------------update user account-------------
-2. ---------request qoute for login users -------------
-3. ---------request qoute for logout users -------------
+2. ---------request Request for login users -------------
+3. ---------request Request for logout users -------------
+3. ---------request Request for logout users -------------
 
 */
 
@@ -15,6 +16,11 @@ const getConnection = require("../DB/mySql");
 const csrf = require('csurf');
 const csrfProtection = csrf({ cookie: true,httpOnly :true})
 const { uniqueNamesGenerator, adjectives, colors, animals } = require('unique-names-generator');
+const { v4: uuid } = require('uuid')
+const generatePDF = require('../middleware/generatePDF')
+const sendMail=require("../middleware/email")
+const path = require('path');
+const fs=require('fs');
 
 
 router.post('/user/:userId/update',verifyJWT,csrfProtection,async(req, res)=>{
@@ -60,7 +66,6 @@ router.post('/user/:userId/update',verifyJWT,csrfProtection,async(req, res)=>{
     }
     else{
 
-        console.log("========userId============")
         let file=req.files.file
         console.log(file)
         if(file.mimetype.toLowerCase()=="image/jpeg"||file.mimetype.toLowerCase()=="image/png"||file.mimetype.toLowerCase=="image/jpg"){
@@ -122,27 +127,30 @@ router.post('/user/:userId/update',verifyJWT,csrfProtection,async(req, res)=>{
 })
 
 //receive quote when user has signed up
-router.post('/signUPuser/:userId/quote',verifyJWT,async(req, res)=>{
+router.post('/signUPuser/:userId/Request',verifyJWT,async(req, res)=>{
+    const { userId} = req.params;
 
     if(req.userId==userId){
     
+        const id=uuid();
         let reg = {
-            name: req.body.firstName,
-            email: req.body.lastName,
-            details: req.body.details,
+            requestId:id,
+            firstName: req.body.firstName,
+            email: req.body.email,
+            detail: '[{"screen": "40 inch", "resolution": "1920 x 1080 pixels", "ports": {"hdmi": 1, "usb": 2}, "speakers": {"left": "10 watt", "right": "10 watt"}}]',
             accountStatus:true,
             status:false
-          };
+          }
 
         getConnection((err,con)=>{
             if(err){
                 return res.status(500).send("error with dataBase1 ",null);
             }
             else{
-                con.query("INSERT INTO Quote1 SET ?",reg,function (err, results) {
+                con.query("INSERT INTO Request1 SET ?",reg,function (err, results) {
                     if (err) {
                         con.release();
-                        return  res.status(500).json({express:{payLoad:"error from server",status:true}})
+                        return  res.status(500).json({express:{payLoad:"error from server",status:false}})
                     } 
                     else {
                         con.release();
@@ -157,38 +165,246 @@ router.post('/signUPuser/:userId/quote',verifyJWT,async(req, res)=>{
         return  res.json({express:{"payLoad":'user needs to login',status:false}})
     }
 })
+
 //receive quote when user has not signed up
-router.post('/user/quote',async(req, res)=>{
-
-
+router.post('/user/Request',async(req, res)=>{
     
+
+    //status it indicate if your request has been responded to;
+
+        const id=uuid();
         let reg = {
-            name: req.body.firstName,
-            email: req.body.lastName,
-            details: req.body.details,
+            requestId:id,
+            firstName: req.body.firstName,
+            email: req.body.email,
+            tel: req.body.tel,
+            detail: '[{"screen": "40 inch", "resolution": "1920 x 1080 pixels", "ports": {"hdmi": 1, "usb": 2}, "speakers": {"left": "10 watt", "right": "10 watt"}}]',
             accountStatus:false,
             status:false
-          };
+        }
         getConnection((err,con)=>{
             if(err){
-                return res.status(500).send("error with dataBase1 ",null);
+                return res.status(500).send("error with dataBase con",null);
             }
             else{
-                con.query("INSERT INTO Quote1 SET ?",reg,function (err, results) {
+                con.query("INSERT INTO Request1 SET ?",reg,function (err, results) {
                     if (err) {
-                      con.release();
-                      console.log(err)
-                    return  res.status(500).json({express:{payLoad:"error from server",status:true}})
+                        con.release();
+                        console.log(err)
+                        return  res.status(500).json({express:{payLoad:"error with dataBase request",status:false}})
                     } 
                     else {
-                      con.release();
-                      return  res.status(200).json({express:{payLoad:"your qoute has been sent you will get a response shortly via email or create an account to review qoute quote ",status:true}})
+                        /*
+                        con.query("SELECT * FROM Quote1",(er,re)=>{
+                        if(er)throw er
+                        console.log(re)
+                        })
+                        */
+                        con.release();
+                        return  res.status(200).json({express:{payLoad:"your request has been sent you will get a response shortly via email or create an account to review qoute",status:true}})
                     }
                 });
             }
         })
 
 })
+
+router.post('/Admin/:adminId/sendQoute',verifyJWT,csrfProtection,async(req, res)=>{
+ 
+    const subject="QOUTE FROM STARMATIFY";
+    const text= "thanks for choosing  us as"
+  //  let path1 = path.relative("starmatifyP", "client/uploads");
+   // console.log(path1)
+  
+    const pdfName=req.body.pdfName
+
+    if(req.body.pdfName){
+        const {adminId} = req.params;
+        if(req.userId==adminId){
+        
+            const id=uuid();
+            const email=req.body.email
+
+            console.log()
+            let detail=JSON.stringify(req.body.detail)
+            let reg = {
+                qouteId:id,
+                firstName: req.body.firstName,
+                email,
+                detail,
+                pdfName,
+                acceptStatus:false
+              }
+    //'[{"screen": "40 inch", "resolution": "1920 x 1080 pixels", "ports": {"hdmi": 1, "usb": 2}, "speakers": {"left": "10 watt", "right": "10 watt"}}]'
+            getConnection((err,con)=>{
+                if(err){
+                    return res.status(500).send("error with dataBase1 ",null);
+                }
+                else{
+                 
+                    con.query("INSERT INTO Quote1 SET ?",reg, function (err, results) {
+                        if (err) {
+                            con.release();
+                            console.log(err)
+                            return  res.status(500).json({express:{payLoad:"error from server",status:false}})
+                        } 
+                        else {
+                           sendMail(email,subject,text,pdfName,(err,data)=>{
+                            if(err){
+                                return  res.status(500).json({express:{payLoad:"encounter error sending email",status:false}})
+                            }
+                            else{
+                                con.release();
+                                return  res.status(200).json({express:{payLoad:"your qoute has been sent you will get a response shortly via email or check your for more detail",status:true}})
+                            }
+                          })
+    
+                          
+                        }
+                   });
+                }
+            })
+          
+        }
+    }
+    else{
+        return  res.status(200).json({express:{payLoad:"kindly view the pdf before sending",status:true}})
+    }
+  
+      
+})
+
+
+router.post('/Admin/:adminId/viewQoute',verifyJWT,csrfProtection,async(req, res)=>{
+    const pdfName =uniqueNamesGenerator({ dictionaries: [adjectives, colors, animals] });
+    
+    const {adminId} = req.params;
+    if(req.userId==adminId){
+       
+    //    doc.pipe(fs.createWriteStream(`starmatifyP/../client/public/uploads/QoutePDF/${pdfName}.pdf`));
+     //   doc.text('Some awesome example text doc is not defined doc is not defined')
+    
+
+        const invoiceData = {
+            addresses: {
+                shipping: {
+                    name: 'John Doe',
+                    address: '2400 Fulton Street',
+                    city: 'San Francisco',
+                    state: 'CA',
+                    country: 'US',
+                    postalCode: 94118
+                },
+                billing: {
+
+                    address: '3rd Floor, No. 22,, Koforidua StreetZone 2,\n Wuse, Abuja, Nigeria',
+                }
+            },
+            memo: 'As discussed',
+            items: [{
+                    itemCode: 12341,
+                    description: 'Laptop Computer',
+                    quantity: 2,
+                    price: 3000,
+                    amount: 6000
+            }, {
+                    itemCode: 12342,
+                    description: 'Printer',
+                    quantity: 1,
+                    price: 2000,
+                    amount: 2000
+                }
+            ],
+            subtotal: 8000,
+            paid: 0,
+            invoiceNumber: 1234,
+            dueDate: 'Feburary 02, 2021'
+        }
+        const pdf = new generatePDF(invoiceData,pdfName)
+        pdf.generate()
+
+        return  res.status(200).json({express:{payLoad:`${pdfName}.pdf`,status:true}})
+    }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -249,3 +465,7 @@ router.post('/user/:userId/update/recoveryQuestion',verifyJWT,csrfProtection,asy
 
 
 module.exports = router;
+
+
+
+//https://www.javatpoint.com/mysql-on-delete-cascade#:~:text=ON%20DELETE%20CASCADE%20clause%20in,related%20to%20the%20foreign%20key.
